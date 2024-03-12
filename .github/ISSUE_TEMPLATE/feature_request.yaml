@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest an idea for this project
+title: "[FEAT]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes: 
+      value: "### If your feature request is to resolve unexpected behavior, use *Bug Report* instead."
+  - type: textarea
+    id: related-problem
+    attributes: 
+      label: Description of the unfavorable solution
+      description: A clear and concise description of what you want to be different.
+      placeholder: I'm always frustrated when ...
+    validations: 
+      required: true
+  - type: textarea
+    id: feature
+    attributes:
+      label: Describe the feature you would like to have
+      description: A clear and concise description of the function and its behavior. The more precisely you describe it, the easier it is to implement your idea.
+      placeholder: Tell us what the feature will do...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here. You can also add pictures or videos if it helps show the feature you like.
+      placeholder: Explain any additional context...
+    validations:
+      required: false
+  - type: markdown
+    attributes: 
+      value: "Thanks for taking the time to fill out this feature request!"

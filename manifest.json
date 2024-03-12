@@ -1,0 +1,11 @@
+{
+	"id": "obsidian-plugin-template",
+	"name": "Obsidian plugin template",
+	"minAppVersion": "0.15.0",
+	"description": "",
+	"author": "4Source",
+	"authorUrl": "https://github.com/4Source",
+	"isDesktopOnly": false,
+	"fundingUrl": "https://www.buymeacoffee.com/4Source",
+	"version": "0.0.0"
+}

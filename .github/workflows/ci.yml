@@ -4,19 +4,19 @@ on:
   pull_request:
     branches:
       - master
-    # paths: 
-    #   - 'src/**'
+    paths: 
+      - 'src/**'
   push: 
     branches:
       - master
-    # paths: 
-    #   - 'src/**'
+    paths: 
+      - 'src/**'
   workflow_dispatch:
 
 jobs:
   test:
     name: Run unit tests
-    runs-on: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository 

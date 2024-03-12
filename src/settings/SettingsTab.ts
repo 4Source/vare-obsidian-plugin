@@ -1,12 +1,12 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import MyPlugin from 'src/main';
+import VarixPlugin from 'src/main';
 
-export class MyPluginSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+export class VarixSettingTab extends PluginSettingTab {
+	plugin: VarixPlugin;
 
 	constructor (
 		app: App,
-		plugin: MyPlugin
+		plugin: VarixPlugin
 	) {
 		super(app, plugin);
 		this.plugin = plugin;

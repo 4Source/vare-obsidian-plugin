@@ -1,6 +1,6 @@
 {
-	"name": "obsidian-plugin-template",
-	"description": "",
+	"name": "varix",
+	"description": "Select version of plugins",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

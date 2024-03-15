@@ -2,6 +2,7 @@ import { App, PluginSettingTab, Setting } from 'obsidian';
 import { ICON_ADD, ICON_GITHUB, ICON_INSTALL, ICON_RELOAD, ICON_REMOVE } from 'src/constants';
 import VarePlugin from 'src/main';
 import { PluginInfo } from './SettingsInterface';
+import { PluginDataModal } from 'src/modals/plugindatamodal';
 
 export class VareSettingTab extends PluginSettingTab {
 	plugin: VarePlugin;
@@ -43,6 +44,11 @@ export class VareSettingTab extends PluginSettingTab {
 				.setTooltip('Add unlisted plugin')
 				.onClick(() => {
 					// Open plugin modal
+					new PluginDataModal(this.plugin, result => {
+						this.pluginsList.push(result);
+						this.display();
+					})
+					.open();
 				}))
 			.addExtraButton(button => button
 				.setIcon(ICON_RELOAD)

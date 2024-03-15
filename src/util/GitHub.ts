@@ -4,7 +4,7 @@
 
 import { PluginManifest, request } from 'obsidian';
 
-export const repositoryRegEx = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}\/[A-Za-z0-9_.-]+$/gi;
+export const repositoryRegEx = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}\/[A-Za-z0-9_.-]+$/i;
 
 export interface CommunityPlugin {
 	id: string;

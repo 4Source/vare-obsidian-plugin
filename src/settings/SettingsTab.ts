@@ -25,11 +25,11 @@ export class VareSettingTab extends PluginSettingTab {
 				},
 			],
 			repo: '',
-			version: '0.0.0'
-		})
+			version: '0.0.0',
+		});
 	}
 
-	display(): void {
+	display (): void {
 		const { containerEl } = this;
 
 		containerEl.empty();
@@ -64,14 +64,10 @@ export class VareSettingTab extends PluginSettingTab {
 				});
 			}
 
-			let settings = new Setting(containerEl.createEl("div", { cls: "plugins-container" }))
+			const settings = new Setting(containerEl.createEl('div', { cls: 'plugins-container' }))
 				.setName(plugin.name)
 				.setDesc(createFragment((fragment) => {
-					fragment.append(
-						`Installed version: ${plugin.version}`,
-						fragment.createEl("br"),
-						`Author: ${plugin.author}`
-					);
+					fragment.append(`Installed version: ${plugin.version}`, fragment.createEl('br'), `Author: ${plugin.author}`);
 				}))
 				.addExtraButton(button => button
 					.setIcon(ICON_GITHUB)
@@ -96,7 +92,7 @@ export class VareSettingTab extends PluginSettingTab {
 							plugin.targetVersion = value;
 						}
 						this.display();
-					}))
+					}));
 
 			if (plugin.targetVersion && plugin.version !== plugin.targetVersion) {
 				settings
@@ -105,7 +101,7 @@ export class VareSettingTab extends PluginSettingTab {
 						.setTooltip('Install version')
 						.onClick(() => {
 							// download plugin version
-						}))
+						}));
 			}
 		});
 	}

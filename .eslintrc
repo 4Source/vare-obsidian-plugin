@@ -50,7 +50,7 @@
     ],
     "@stylistic/function-call-argument-newline": [
       "error",
-      "never"
+      "consistent"
     ],
     "@stylistic/function-call-spacing": "error",
     "@stylistic/implicit-arrow-linebreak": "error",

@@ -16,6 +16,7 @@
 		"@stylistic/eslint-plugin": "^1.6.3",
 		"@types/jest": "^29.5.12",
 		"@types/node": "^16.11.6",
+		"@types/obsidian-typings": "npm:obsidian-typings@^1.0.3",
 		"@typescript-eslint/eslint-plugin": "^7.1.0",
 		"@typescript-eslint/parser": "^7.1.0",
 		"builtin-modules": "3.3.0",

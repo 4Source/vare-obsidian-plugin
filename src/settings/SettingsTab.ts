@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginManifest, PluginSettingTab, Setting } from 'obsidian';
 import { ICON_ADD, ICON_FETCH, ICON_FIX, ICON_GITHUB, ICON_INSTALL, ICON_RELOAD, ICON_RESET } from 'src/constants';
 import VarePlugin from 'src/main';
 import { PluginData, PluginInfo } from './SettingsInterface';
@@ -17,7 +17,7 @@ export class VareSettingTab extends PluginSettingTab {
 		const manifests = Object.entries(structuredClone(this.plugin.app.plugins.manifests));
 		const pluginData = Object.entries(this.plugin.settings.plugins);
 		this.pluginsList = manifests.map(manifest => {
-			const info: PluginInfo = { ...(manifest[1]), repo: '', releases: [] };
+			const info: PluginInfo = { ...(manifest[1] as PluginManifest), repo: '', releases: [] };
 			const data = pluginData.filter(data => data[0] === manifest[0])[0];
 			if (!data) {
 				return info;

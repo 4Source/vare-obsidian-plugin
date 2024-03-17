@@ -1,6 +1,6 @@
 {
 	"name": "vare",
-	"description": "Select version of plugins",
+	"description": "",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

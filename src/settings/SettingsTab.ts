@@ -2,7 +2,7 @@ import { App, PluginSettingTab, Setting } from 'obsidian';
 import { ICON_ADD, ICON_GITHUB, ICON_INSTALL, ICON_RELOAD, ICON_REMOVE } from 'src/constants';
 import VarePlugin from 'src/main';
 import { PluginInfo } from './SettingsInterface';
-import { PluginDataModal } from 'src/modals/plugindatamodal';
+import { PluginDataModal } from 'src/modals/PluginDataModal';
 
 export class VareSettingTab extends PluginSettingTab {
 	plugin: VarePlugin;

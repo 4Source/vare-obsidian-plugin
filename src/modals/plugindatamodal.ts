@@ -1,14 +1,14 @@
 import { Modal, Notice, Setting } from "obsidian";
-import VarixPlugin from "src/main";
+import VarePlugin from "src/main";
 import { PluginInfo } from "src/settings/SettingsInterface";
 import { fetchManifest, fetchReleases, repositoryRegEx } from "src/util/GitHub";
 
 
 export class PluginDataModal extends Modal {
-	plugin: VarixPlugin;
+	plugin: VarePlugin;
 	onSubmit: (result: PluginInfo) => void;
 
-	constructor(plugin: VarixPlugin, onSubmit: (result: PluginInfo) => void) {
+	constructor(plugin: VarePlugin, onSubmit: (result: PluginInfo) => void) {
 		super(plugin.app);
 
 		this.plugin = plugin;

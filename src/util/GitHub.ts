@@ -51,7 +51,7 @@ export type File = {
  * Fetch all community plugin entrys.
  * @returns A list of community plugins
  */
-export async function fetchCommmunityPluginList (): Promise<CommunityPlugin[] | undefined> {
+export async function fetchCommmunityPluginList(): Promise<CommunityPlugin[] | undefined> {
 	const URL = 'https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-plugins.json';
 	try {
 		// Do a request to the url
@@ -71,7 +71,7 @@ export async function fetchCommmunityPluginList (): Promise<CommunityPlugin[] | 
  * @param repository The <user>/<repo> of the plugin
  * @returns A list of all releases
  */
-export async function fetchReleases (repository: string): Promise<Partial<Release>[] | undefined> {
+export async function fetchReleases(repository: string): Promise<Partial<Release>[] | undefined> {
 	const URL = `https://api.github.com/repos/${repository}/releases`;
 	try {
 		if (!repositoryRegEx.test(repository)) {
@@ -101,7 +101,7 @@ export async function fetchReleases (repository: string): Promise<Partial<Releas
  * @param tag_name The name of the tag associated with a release. Required if a specific manifest version is needed.
  * @returns The plugin manifest object
  */
-export async function fetchManifest (repository: string, tag_name?: string): Promise<PluginManifest | undefined> {
+export async function fetchManifest(repository: string, tag_name?: string): Promise<PluginManifest | undefined> {
 	const URL = `https://raw.githubusercontent.com/${repository}/${tag_name ? tag_name : 'HEAD'}/manifest.json`;
 	try {
 		if (!repositoryRegEx.test(repository)) {
@@ -126,7 +126,7 @@ export async function fetchManifest (repository: string, tag_name?: string): Pro
  * @returns The Assets attached to the release as string
  * @todo Checksum
  */
-export async function downloadReleaseAssets (repository: string, tag_name: string): Promise<File[] | undefined> {
+export async function downloadReleaseAssets(repository: string, tag_name: string): Promise<File[] | undefined> {
 	const URL = `https://api.github.com/repos/${repository}/releases/tags/${tag_name}`;
 	try {
 		if (!repositoryRegEx.test(repository)) {

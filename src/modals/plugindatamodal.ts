@@ -7,14 +7,14 @@ export class PluginDataModal extends Modal {
 	plugin: VarePlugin;
 	onSubmit: (result: PluginInfo) => void;
 
-	constructor (plugin: VarePlugin, onSubmit: (result: PluginInfo) => void) {
+	constructor(plugin: VarePlugin, onSubmit: (result: PluginInfo) => void) {
 		super(plugin.app);
 
 		this.plugin = plugin;
 		this.onSubmit = onSubmit;
 	}
 
-	onOpen (): void {
+	onOpen(): void {
 		const { contentEl } = this;
 		let username: string;
 		let repository: string;
@@ -84,7 +84,7 @@ export class PluginDataModal extends Modal {
 				}));
 	}
 
-	onClose (): void {
+	onClose(): void {
 		const { contentEl } = this;
 		contentEl.empty();
 	}

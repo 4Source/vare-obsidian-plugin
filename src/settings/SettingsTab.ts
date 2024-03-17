@@ -9,7 +9,7 @@ export class VareSettingTab extends PluginSettingTab {
 	plugin: VarePlugin;
 	pluginsList: PluginInfo[];
 
-	constructor (app: App, plugin: VarePlugin) {
+	constructor(app: App, plugin: VarePlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 
@@ -31,7 +31,7 @@ export class VareSettingTab extends PluginSettingTab {
 		});
 	}
 
-	display (): void {
+	display(): void {
 		const { containerEl } = this;
 
 		containerEl.empty();

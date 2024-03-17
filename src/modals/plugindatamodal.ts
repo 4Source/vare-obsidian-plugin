@@ -1,21 +1,20 @@
-import { Modal, Notice, Setting } from "obsidian";
-import VarePlugin from "src/main";
-import { PluginInfo } from "src/settings/SettingsInterface";
-import { fetchManifest, fetchReleases, repositoryRegEx } from "src/util/GitHub";
-
+import { Modal, Notice, Setting } from 'obsidian';
+import VarePlugin from 'src/main';
+import { PluginInfo } from 'src/settings/SettingsInterface';
+import { fetchManifest, fetchReleases, repositoryRegEx } from 'src/util/GitHub';
 
 export class PluginDataModal extends Modal {
 	plugin: VarePlugin;
 	onSubmit: (result: PluginInfo) => void;
 
-	constructor(plugin: VarePlugin, onSubmit: (result: PluginInfo) => void) {
+	constructor (plugin: VarePlugin, onSubmit: (result: PluginInfo) => void) {
 		super(plugin.app);
 
 		this.plugin = plugin;
 		this.onSubmit = onSubmit;
 	}
 
-	onOpen(): void {
+	onOpen (): void {
 		const { contentEl } = this;
 		let username: string;
 		let repository: string;
@@ -43,22 +42,21 @@ export class PluginDataModal extends Modal {
 					repository = value;
 				}));
 
-
 		new Setting(contentEl)
 			.addButton(button => button
 				.setButtonText('Save')
 				.onClick(async () => {
 					if (!username || username === '') {
-						new Notice("Github username cannot be empty!");
+						new Notice('Github username cannot be empty!');
 						return;
 					}
 					if (!repository || repository === '') {
-						new Notice("Github repository cannot be empty!");
+						new Notice('Github repository cannot be empty!');
 						return;
 					}
 					const repo = `${username}/${repository}`;
 					if (!repositoryRegEx.test(repo)) {
-						new Notice("Github <username>/<repository> do not match the pattern!");
+						new Notice('Github <username>/<repository> do not match the pattern!');
 						return;
 					}
 					const manifest = await fetchManifest(repo);
@@ -66,16 +64,17 @@ export class PluginDataModal extends Modal {
 						new Notice('Github repository could not be found!');
 						return;
 					}
-					let releases = await fetchReleases(repo);
+					const releases = await fetchReleases(repo);
 					if (!releases || releases.length <= 0) {
 						new Notice('No releases found for this plugin. May it do not have any.');
 						return;
 					}
-					// Combine data 
-					const pluginInfo = Object.assign({}, manifest, { repo, releases });
+					// Combine data
+					const pluginInfo = Object.assign({}, manifest, { repo, releases }) as PluginInfo;
+					pluginInfo.targetVersion = pluginInfo.version;
+					pluginInfo.version = '';
 					this.onSubmit(pluginInfo);
 					this.close();
-
 				}))
 			.addButton(button => button
 				.setButtonText('Cancel')
@@ -85,7 +84,7 @@ export class PluginDataModal extends Modal {
 				}));
 	}
 
-	onClose(): void {
+	onClose (): void {
 		const { contentEl } = this;
 		contentEl.empty();
 	}

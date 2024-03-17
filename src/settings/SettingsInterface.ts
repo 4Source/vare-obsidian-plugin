@@ -1,4 +1,4 @@
-import { Release } from "src/util/GitHub";
+import { Release } from 'src/util/GitHub';
 
 export interface Settings {
 	plugins: PluginData[];

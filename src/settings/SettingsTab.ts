@@ -1,14 +1,15 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import { ICON_ADD, ICON_GITHUB, ICON_INSTALL, ICON_RELOAD, ICON_REMOVE } from 'src/constants';
 import VarePlugin from 'src/main';
-import { PluginInfo } from './SettingsInterface';
+import { PluginData, PluginInfo } from './SettingsInterface';
 import { PluginDataModal } from 'src/modals/PluginDataModal';
+import { fetchManifest } from 'src/util/GitHub';
 
 export class VareSettingTab extends PluginSettingTab {
 	plugin: VarePlugin;
 	pluginsList: PluginInfo[];
 
-	constructor(app: App, plugin: VarePlugin) {
+	constructor (app: App, plugin: VarePlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 
@@ -48,7 +49,7 @@ export class VareSettingTab extends PluginSettingTab {
 						this.pluginsList.push(result);
 						this.display();
 					})
-					.open();
+						.open();
 				}))
 			.addExtraButton(button => button
 				.setIcon(ICON_RELOAD)
@@ -91,12 +92,7 @@ export class VareSettingTab extends PluginSettingTab {
 					.addOptions(versions)
 					.setValue(plugin.targetVersion || plugin.version)
 					.onChange(value => {
-						if (value === 'latest') {
-							plugin.targetVersion = undefined;
-						}
-						else {
-							plugin.targetVersion = value;
-						}
+						plugin.targetVersion = value;
 						this.display();
 					}));
 
@@ -105,8 +101,42 @@ export class VareSettingTab extends PluginSettingTab {
 					.addExtraButton(button => button
 						.setIcon(ICON_INSTALL)
 						.setTooltip('Install version')
-						.onClick(() => {
-							// download plugin version
+						.onClick(async () => {
+							try {
+								// Fetch the manifest from GitHub
+								const manifest = await fetchManifest(plugin.repo, plugin.targetVersion);
+								if (!manifest) {
+									throw Error('No manifest found for this plugin!');
+								}
+								// Ensure contains dir
+								if (!manifest.dir) {
+									manifest.dir = plugin.id;
+								}
+								// Get the version that should be installed
+								const version = plugin.targetVersion || manifest.version;
+								if (!version) {
+									throw Error('Manifest do not contain a version!');
+								}
+								// Install plugin
+								await this.plugin.app.plugins.installPlugin(plugin.repo, version, manifest);
+								// Update manifest
+								const installed = this.plugin.app.plugins.manifests[plugin.id];
+								if (!installed) {
+									throw Error('Installation failed!');
+								}
+								plugin.version = installed.version;
+
+								// Update and save Settings
+								const data = plugin as PluginData;
+								this.plugin.settings.plugins.push(data);
+								await this.plugin.saveSettings();
+
+								this.display();
+							}
+							catch (e) {
+								(e as Error).message = 'Failed to install plugin! ' + (e as Error).message;
+								console.error(e);
+							}
 						}));
 			}
 		});

@@ -1,15 +1,15 @@
 import { Plugin } from 'obsidian';
+import { VareSettingTab } from './settings/SettingsTab';
 import { DEFAULT_SETTINGS, Settings } from './settings/SettingsInterface';
-import { VarixSettingTab } from './settings/SettingsTab';
 
-export default class VarixPlugin extends Plugin {
+export default class VarePlugin extends Plugin {
 	settings: Settings;
 
 	async onload () {
 		await this.loadSettings();
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new VarixSettingTab(this.app, this));
+		this.addSettingTab(new VareSettingTab(this.app, this));
 	}
 
 	onunload () {

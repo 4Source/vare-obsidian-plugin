@@ -1,0 +1,129 @@
+import { Modal, PluginManifest, Setting, debounce } from 'obsidian';
+import { ICON_ACCEPT, ICON_DENY } from 'src/constants';
+import VarePlugin from 'src/main';
+import { PluginInfo } from 'src/settings/SettingsInterface';
+import { Release, fetchManifest, fetchReleases, repositoryRegEx } from 'src/util/GitHub';
+
+export class TroubleshootingModal extends Modal {
+	plugin: VarePlugin;
+	pluginInfo: PluginInfo;
+	onSubmit: (result: PluginInfo) => void;
+
+	constructor(plugin: VarePlugin, pluginInfo: PluginInfo, onSubmit: (result: PluginInfo) => void) {
+		super(plugin.app);
+
+		this.plugin = plugin;
+		this.pluginInfo = structuredClone(pluginInfo);
+		this.onSubmit = onSubmit;
+	}
+
+	async onOpen(): Promise<void> {
+		const { contentEl } = this;
+		let username = this.pluginInfo.repo.split('/').at(0) || '';
+		let repository = this.pluginInfo.repo.split('/').at(1) || '';
+		let manifest: PluginManifest | undefined;
+		let hasManifest = false;
+		let releases: Partial<Release>[] | undefined;
+		let hasReleases = false;
+
+		const updateRepo = debounce(() => {
+			this.pluginInfo.repo = `${username}/${repository}`;
+			this.update();
+		}, 1500, true);
+
+		// Heading for Edit profile
+		this.setTitle(`Troubleshoot plugin ${this.pluginInfo.name}`);
+
+		new Setting(contentEl)
+			.setName('Github username')
+			.setDesc('The name of the owner of the plugin')
+			.addText(text => text
+				.setPlaceholder('Username')
+				.setValue(username)
+				.onChange(value => {
+					username = value;
+					updateRepo();
+				}));
+
+		new Setting(contentEl)
+			.setName('Github repository')
+			.setDesc('The name of the repository of the plugin')
+			.addText(text => text
+				.setPlaceholder('Repository')
+				.setValue(repository)
+				.onChange(value => {
+					repository = value;
+					updateRepo();
+				}));
+
+		new Setting(contentEl)
+			.setName('Test pattern')
+			.setDesc(repositoryRegEx.test(this.pluginInfo.repo) ? '' : 'Username or repository contains invalid input.')
+			.addExtraButton(button => button
+				.setIcon(repositoryRegEx.test(this.pluginInfo.repo) ? ICON_ACCEPT : ICON_DENY)
+				.setTooltip(repositoryRegEx.test(this.pluginInfo.repo) ? '' : 'Try again?')
+				.setDisabled(repositoryRegEx.test(this.pluginInfo.repo))
+				.onClick(() => {
+					this.update();
+				}));
+
+		if (repositoryRegEx.test(this.pluginInfo.repo)) {
+			manifest = await fetchManifest(this.pluginInfo.repo);
+			hasManifest = manifest !== undefined;
+			new Setting(contentEl)
+				.setName('Test connection')
+				.setDesc(hasManifest ? '' : 'Repo could not be found on GitHub. Is everything typed correctly?')
+				.addExtraButton(button => button
+					.setIcon(hasManifest ? ICON_ACCEPT : ICON_DENY)
+					.setTooltip(hasManifest ? '' : 'Try again?')
+					.setDisabled(hasManifest)
+					.onClick(() => {
+						this.update();
+					}));
+		}
+
+		if (hasManifest) {
+			releases = await fetchReleases(this.pluginInfo.repo);
+			hasReleases = releases !== undefined && (releases.length > 0);
+			new Setting(contentEl)
+				.setName('Test releases')
+				.setDesc(hasReleases ? '' : 'Could not find releases on GitHub. May this plugin did not have any.')
+				.addExtraButton(button => button
+					.setIcon(hasReleases ? ICON_ACCEPT : ICON_DENY)
+					.setTooltip(hasReleases ? '' : 'Try again?')
+					.setDisabled(hasReleases)
+					.onClick(() => {
+						this.update();
+					}));
+		}
+
+		new Setting(contentEl)
+			.addButton(button => button
+				.setButtonText('Save')
+				.setDisabled(!repositoryRegEx.test(this.pluginInfo.repo) || !hasManifest)
+				.onClick(async () => {
+					if (hasReleases && releases) {
+						this.pluginInfo.releases = releases;
+						this.pluginInfo.lastFetch = new Date();
+					}
+					this.onSubmit(this.pluginInfo);
+					this.close();
+				}))
+			.addButton(button => button
+				.setButtonText('Cancel')
+				.setWarning()
+				.onClick(() => {
+					this.close();
+				}));
+	}
+
+	onClose(): void {
+		const { contentEl } = this;
+		contentEl.empty();
+	}
+
+	update(): void {
+		this.onClose();
+		this.onOpen();
+	}
+}

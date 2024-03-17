@@ -1,5 +1,6 @@
 export const ICON_OPEN_FOLDER = 'folder-open';
 export const ICON_ACCEPT = 'check';
+export const ICON_DENY = 'x';
 export const ICON_ADD = 'plus';
 export const ICON_RELOAD = 'refresh-cw';
 export const ICON_OPTIONS = 'settings';

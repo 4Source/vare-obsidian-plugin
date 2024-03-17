@@ -4,6 +4,7 @@ import VarePlugin from 'src/main';
 import { PluginData, PluginInfo } from './SettingsInterface';
 import { PluginDataModal } from 'src/modals/PluginDataModal';
 import { fetchCommmunityPluginList, fetchManifest, fetchReleases } from 'src/util/GitHub';
+import { TroubleshootingModal } from 'src/modals/TroubleshootingModal';
 
 export class VareSettingTab extends PluginSettingTab {
 	plugin: VarePlugin;
@@ -34,7 +35,7 @@ export class VareSettingTab extends PluginSettingTab {
 		const communityList = await fetchCommmunityPluginList();
 		Promise.all(this.pluginsList.map(async value => {
 			const now = new Date();
-			
+
 			/**
 			 * Fetch releases when one of the codition is true to reduce loading time and network trafic
 			 * - Has never been fetched
@@ -84,8 +85,7 @@ export class VareSettingTab extends PluginSettingTab {
 							new PluginDataModal(this.plugin, result => {
 								this.pluginsList.push(result);
 								this.display();
-							})
-								.open();
+							}).open();
 						}))
 					.addExtraButton(button => button
 						.setIcon(ICON_RELOAD)
@@ -174,7 +174,16 @@ export class VareSettingTab extends PluginSettingTab {
 							.setTooltip('Troubleshoot plugin.')
 							.setWarning()
 							.onClick(() => {
-								// open modal
+								new TroubleshootingModal(this.plugin, plugin, result => {
+									this.pluginsList.every((value, index, array) => {
+										if (value.id === result.id) {
+											array[index] = result;
+											return false;
+										}
+										return true;
+									});
+									this.display();
+								}).open();
 							}));
 					}
 

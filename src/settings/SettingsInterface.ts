@@ -12,11 +12,12 @@ export interface PluginData {
 	id: string;
 	targetVersion?: string;
 	repo: string;
+	releases: Partial<Release>[];
+	lastFetch?: Date;
 }
 
 export interface PluginInfo extends PluginData {
 	name: string;
 	author: string;
 	version: string;
-	releases: Partial<Release>[]
 }

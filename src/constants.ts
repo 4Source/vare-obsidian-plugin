@@ -9,3 +9,4 @@ export const ICON_INSTALL = 'download';
 export const ICON_GITHUB = 'github';
 export const ICON_FIX = 'wrench';
 export const ICON_RESET = 'loader';
+export const ICON_FETCH = 'download-cloud';

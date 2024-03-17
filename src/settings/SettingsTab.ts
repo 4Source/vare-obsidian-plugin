@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import { ICON_ADD, ICON_FIX, ICON_GITHUB, ICON_INSTALL, ICON_RELOAD, ICON_RESET } from 'src/constants';
+import { ICON_ADD, ICON_FETCH, ICON_FIX, ICON_GITHUB, ICON_INSTALL, ICON_RELOAD, ICON_RESET } from 'src/constants';
 import VarePlugin from 'src/main';
 import { PluginData, PluginInfo } from './SettingsInterface';
 import { PluginDataModal } from 'src/modals/PluginDataModal';
@@ -33,7 +33,14 @@ export class VareSettingTab extends PluginSettingTab {
 		// Get the releases for plugins
 		const communityList = await fetchCommmunityPluginList();
 		Promise.all(this.pluginsList.map(async value => {
-			if (value.releases.length <= 0) {
+			const now = new Date();
+			
+			/**
+			 * Fetch releases when one of the codition is true to reduce loading time and network trafic
+			 * - Has never been fetched
+			 * - The last fetch was more than a day ago
+			 */
+			if (!value.lastFetch || now.getTime() - (1000 * 60 * 60 * 12) >= new Date(value.lastFetch).getTime()) {
 				// Get repo from community plugin list if there is an entry
 				if (value.repo === '') {
 					const community = communityList?.find(community => community.id === value.id);
@@ -47,9 +54,23 @@ export class VareSettingTab extends PluginSettingTab {
 				if (!releases) {
 					return;
 				}
+				value.lastFetch = now;
 				value.releases = releases;
 			}
+
+			// Update and save Settings
+			const data: PluginData = {
+				id: value.id,
+				repo: value.repo,
+				targetVersion: value.targetVersion,
+				releases: value.releases,
+				lastFetch: value.lastFetch,
+			};
+			this.plugin.settings.plugins[value.id] = data;
 		}))
+			.then(async () => {
+				await this.plugin.saveSettings();
+			})
 			.then(() => {
 				// Heading for Profiles
 				new Setting(containerEl)
@@ -97,14 +118,27 @@ export class VareSettingTab extends PluginSettingTab {
 							fragment.append(`Installed version: ${plugin.version}`, fragment.createEl('br'), `Author: ${plugin.author}`);
 						}));
 
-					// GitHub link button
+					// GitHub link button and release fetch
 					if (plugin.repo) {
 						settings.addExtraButton(button => button
 							.setIcon(ICON_GITHUB)
 							.setTooltip('Open at GitHub')
 							.onClick(async () => {
 								self.open(`https://github.com/${plugin.repo}`);
-							}));
+							}))
+							.addExtraButton(button => button
+								.setIcon(ICON_FETCH)
+								.setTooltip('Fetch releases')
+								.onClick(async () => {
+									// Fetch releases from github
+									const releases = await fetchReleases(plugin.repo);
+									if (!releases) {
+										return;
+									}
+									plugin.lastFetch = new Date();
+									plugin.releases = releases;
+									this.display();
+								}));
 					}
 					else {
 						trouble = true;
@@ -178,6 +212,8 @@ export class VareSettingTab extends PluginSettingTab {
 										id: plugin.id,
 										repo: plugin.repo,
 										targetVersion: plugin.targetVersion,
+										releases: plugin.releases,
+										lastFetch: plugin.lastFetch,
 									};
 									this.plugin.settings.plugins[plugin.id] = data;
 									await this.plugin.saveSettings();

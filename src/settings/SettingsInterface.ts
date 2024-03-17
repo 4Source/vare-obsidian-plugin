@@ -1,11 +1,11 @@
 import { Release } from 'src/util/GitHub';
 
 export interface Settings {
-	plugins: PluginData[];
+	plugins: Record<PluginData['id'], PluginData>
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-	plugins: [],
+	plugins: {},
 };
 
 export interface PluginData {

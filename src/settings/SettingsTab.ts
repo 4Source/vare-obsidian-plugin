@@ -127,8 +127,12 @@ export class VareSettingTab extends PluginSettingTab {
 								plugin.version = installed.version;
 
 								// Update and save Settings
-								const data = plugin as PluginData;
-								this.plugin.settings.plugins.push(data);
+								const data: PluginData = {
+									id: plugin.id,
+									repo: plugin.repo,
+									targetVersion: plugin.targetVersion,
+								};
+								this.plugin.settings.plugins[plugin.id] = data;
 								await this.plugin.saveSettings();
 
 								this.display();

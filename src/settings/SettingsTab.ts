@@ -14,16 +14,7 @@ export class VareSettingTab extends PluginSettingTab {
 		super(app, plugin);
 		this.plugin = plugin;
 
-		const manifests = Object.entries(structuredClone(this.plugin.app.plugins.manifests));
-		const pluginData = Object.entries(this.plugin.settings.plugins);
-		this.pluginsList = manifests.map(manifest => {
-			const info: PluginInfo = { ...(manifest[1] as PluginManifest), repo: '', releases: [] };
-			const data = pluginData.filter(data => data[0] === manifest[0])[0];
-			if (!data) {
-				return info;
-			}
-			return Object.assign(info, data[1]);
-		});
+		this.loadPluginList();
 	}
 
 	async display(): Promise<void> {
@@ -92,6 +83,7 @@ export class VareSettingTab extends PluginSettingTab {
 						.setTooltip('Reload plugins')
 						.onClick(() => {
 							// Reload plugins
+							this.loadPluginList();
 							this.display();
 						}));
 
@@ -238,5 +230,27 @@ export class VareSettingTab extends PluginSettingTab {
 					}
 				});
 			});
+	}
+
+	loadPluginList() {
+		const manifests = Object.entries(structuredClone(this.plugin.app.plugins.manifests));
+		const pluginData = Object.entries(structuredClone(this.plugin.settings.plugins));
+
+		// Remove unused plugins
+		const upToDate = pluginData.filter(data => !manifests.every(entry => data[0] !== entry[0]));
+		this.plugin.settings.plugins = {};
+		upToDate.forEach(plugin => {
+			this.plugin.settings.plugins[plugin[0]] = plugin[1] as PluginData;
+		});
+		
+		// Set plugin list
+		this.pluginsList = manifests.map(manifest => {
+			const info: PluginInfo = { ...(manifest[1] as PluginManifest), repo: '', releases: [] };
+			const data = upToDate.filter(data => data[0] === manifest[0])[0];
+			if (!data) {
+				return info;
+			}
+			return Object.assign(info, data[1]);
+		});
 	}
 }

@@ -50,9 +50,7 @@ jobs:
       
       - name: Commit and push changes
         run: |
-          git status
-          git add manifest.json versions.json package.json
-          git commit -m "Apply version ${{ steps.version-bump.outputs.new_version }}"
+          git commit -a -m "Apply version ${{ steps.version-bump.outputs.new_version }}"
           git push -f 
 
     outputs:

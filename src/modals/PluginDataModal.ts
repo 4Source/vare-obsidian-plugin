@@ -28,7 +28,7 @@ export class PluginDataModal extends Modal {
 			.addText(text => text
 				.setPlaceholder('Username')
 				.onChange(value => {
-					// Assign value of this Setting 
+					// Assign value of this Setting
 					username = value;
 				}));
 
@@ -38,7 +38,7 @@ export class PluginDataModal extends Modal {
 			.addText(text => text
 				.setPlaceholder('Repository')
 				.onChange(value => {
-					// Assign value of this Setting 
+					// Assign value of this Setting
 					repository = value;
 				}));
 

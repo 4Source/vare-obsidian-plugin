@@ -26,6 +26,7 @@ export class PluginTroubleshootingModal extends Modal {
 		let releases: Partial<Release>[] | undefined;
 		let hasReleases = false;
 
+		// Debonce text input
 		const updateRepo = debounce(() => {
 			this.pluginInfo.repo = `${username}/${repository}`;
 			this.update();

@@ -118,38 +118,3 @@ export async function fetchManifest(repository: string, tag_name?: string): Prom
 		console.error(e);
 	}
 }
-
-/**
- * Downloads the assets from a release from GitHub
- * @param repository The <user>/<repo> of the plugin
- * @param tag_name The name of the tag associated with a release.
- * @returns The Assets attached to the release as string
- * @todo Checksum
- */
-export async function downloadReleaseAssets(repository: string, tag_name: string): Promise<File[] | undefined> {
-	const URL = `https://api.github.com/repos/${repository}/releases/tags/${tag_name}`;
-	try {
-		if (!repositoryRegEx.test(repository)) {
-			throw Error('Repository string do not match the pattern!');
-		}
-		const response = await request({ url: URL });
-		const data = await JSON.parse(response);
-		const assets: Asset[] = data.assets;
-
-		const assetData: File[] = [];
-
-		assets.forEach(async (asset) => {
-			const URL = asset.browser_download_url;
-			const response = await request({
-				url: URL,
-			});
-			assetData.push({ name: asset.name, data: response });
-		});
-
-		return assetData;
-	}
-	catch (e) {
-		(e as Error).message = 'Failed to fetch the release for plugin! ' + (e as Error).message;
-		console.error(e);
-	}
-}

@@ -47,23 +47,36 @@ jobs:
       - name: Change version in files
         run: | 
           npm run version -- --new_version=${{ steps.version-bump.outputs.new_version }}
-          git add manifest.json versions.json package.json
       
       - name: Commit and push changes
         run: |
+          git add manifest.json versions.json package.json
           git commit -m "Apply version ${{ steps.version-bump.outputs.new_version }}"
           git push -f 
 
-      - name: Push version tag
-        run: |
-          git tag -a ${{ steps.version-bump.outputs.new_tag }} -m "${{ steps.version-bump.outputs.new_tag }}"
-          git push -f origin ${{ steps.version-bump.outputs.new_tag }}
     outputs:
       new_tag: ${{ steps.version-bump.outputs.new_tag }}
-        
-  build: 
+      
+  taging:
     runs-on: ubuntu-latest
     needs: versioning
+    permissions: 
+        pull-requests: write
+        contents: write
+    
+    steps: 
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        
+      - name: Push version tag
+        run: |
+          git tag -a ${{ needs.versioning.outputs.new_tag }} -m "${{ needs.versioning.outputs.new_tag }}"
+          git push -f origin ${{ needs.versioning.outputs.new_tag }}
+
+  build: 
+    runs-on: ubuntu-latest
+    needs: taging
     permissions:
       contents: write
 

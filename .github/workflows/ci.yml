@@ -6,11 +6,13 @@ on:
       - master
     paths: 
       - 'src/**'
+      - 'test/**'
   push: 
     branches:
       - master
     paths: 
       - 'src/**'
+      - 'test/**'
   workflow_dispatch:
 
 jobs:

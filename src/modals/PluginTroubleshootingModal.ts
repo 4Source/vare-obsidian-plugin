@@ -4,7 +4,7 @@ import VarePlugin from 'src/main';
 import { PluginInfo } from 'src/settings/SettingsInterface';
 import { Release, fetchManifest, fetchReleases, repositoryRegEx } from 'src/util/GitHub';
 
-export class TroubleshootingModal extends Modal {
+export class PluginTroubleshootingModal extends Modal {
 	plugin: VarePlugin;
 	pluginInfo: PluginInfo;
 	onSubmit: (result: PluginInfo) => void;

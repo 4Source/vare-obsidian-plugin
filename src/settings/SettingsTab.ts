@@ -208,6 +208,7 @@ export class VareSettingTab extends PluginSettingTab {
 										throw Error('Manifest do not contain a version!');
 									}
 									// Install plugin
+									// @ts-expect-error PluginManifest contains error
 									await this.plugin.app.plugins.installPlugin(plugin.repo, version, manifest);
 									// Update manifest
 									const installed = this.plugin.app.plugins.manifests[plugin.id];

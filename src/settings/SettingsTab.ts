@@ -4,7 +4,7 @@ import VarePlugin from 'src/main';
 import { PluginData, PluginInfo } from './SettingsInterface';
 import { PluginDataModal } from 'src/modals/PluginDataModal';
 import { fetchCommmunityPluginList, fetchManifest, fetchReleases } from 'src/util/GitHub';
-import { TroubleshootingModal } from 'src/modals/TroubleshootingModal';
+import { PluginTroubleshootingModal } from 'src/modals/PluginTroubleshootingModal';
 
 export class VareSettingTab extends PluginSettingTab {
 	plugin: VarePlugin;
@@ -166,7 +166,7 @@ export class VareSettingTab extends PluginSettingTab {
 							.setTooltip('Troubleshoot plugin.')
 							.setWarning()
 							.onClick(() => {
-								new TroubleshootingModal(this.plugin, plugin, result => {
+								new PluginTroubleshootingModal(this.plugin, plugin, result => {
 									this.pluginsList.every((value, index, array) => {
 										if (value.id === result.id) {
 											array[index] = result;

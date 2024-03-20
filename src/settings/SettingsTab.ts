@@ -192,7 +192,7 @@ export class VareSettingTab extends PluginSettingTab {
 									}
 									// Ensure contains dir
 									if (!manifest.dir) {
-										manifest.dir = plugin.id;
+										manifest.dir = this.app.vault.configDir + '/plugins/' + plugin.id;
 									}
 									// Get the version that should be installed
 									const version = plugin.targetVersion || manifest.version;

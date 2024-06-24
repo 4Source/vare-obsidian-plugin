@@ -85,6 +85,9 @@ export async function fetchReleases(repository: string): Promise<Partial<Release
 			return {
 				tag_name: value.tag_name,
 				prerelease: value.prerelease,
+				manifest_url: value.assets.find(asset => {
+					asset.name === 'manifest.json';
+				})?.browser_download_url,
 			};
 		});
 		return releases;
@@ -101,8 +104,8 @@ export async function fetchReleases(repository: string): Promise<Partial<Release
  * @param tag_name The name of the tag associated with a release. Required if a specific manifest version is needed.
  * @returns The plugin manifest object
  */
-export async function fetchManifest(repository: string, tag_name?: string): Promise<PluginManifest | undefined> {
-	const URL = `https://raw.githubusercontent.com/${repository}/${tag_name ? tag_name : 'HEAD'}/manifest.json`;
+export async function fetchManifest(repository: string, tag_name?: string, manifest_url?: string): Promise<PluginManifest | undefined> {
+	const URL = manifest_url ? manifest_url : `https://raw.githubusercontent.com/${repository}/${tag_name ? tag_name : 'HEAD'}/manifest.json`;
 	try {
 		if (!repositoryRegEx.test(repository)) {
 			throw Error('Repository string do not match the pattern!');

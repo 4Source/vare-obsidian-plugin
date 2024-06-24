@@ -87,7 +87,7 @@ export async function fetchReleases(repository: string): Promise<Partial<Release
 				prerelease: value.prerelease,
 				manifest_url: value.assets.find( asset => {
 					asset.name === "manifest.json"
-				}).browser_download_url
+				})?.browser_download_url
 			};
 		});
 		return releases;

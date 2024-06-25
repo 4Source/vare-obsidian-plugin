@@ -23,7 +23,6 @@ export class PluginTroubleshootingModal extends Modal {
 		let repository = this.pluginInfo.repo.split('/').at(1) || '';
 		let manifest: PluginManifest | undefined;
 		let hasManifest = false;
-		let releases: Partial<Release>[] | undefined;
 		let hasReleases = false;
 
 		// Debonce text input
@@ -42,7 +41,14 @@ export class PluginTroubleshootingModal extends Modal {
 				.setPlaceholder('Username')
 				.setValue(username)
 				.onChange(value => {
-					username = value;
+					if (value.contains('/')) {
+						const repoSections = value.split('/');
+						username = repoSections[0];
+						repository = repoSections[1];
+					}
+					else {
+						username = value;
+					}
 					updateRepo();
 				}));
 
@@ -53,7 +59,14 @@ export class PluginTroubleshootingModal extends Modal {
 				.setPlaceholder('Repository')
 				.setValue(repository)
 				.onChange(value => {
-					repository = value;
+					if (value.contains('/')) {
+						const repoSections = value.split('/');
+						username = repoSections[0];
+						repository = repoSections[1];
+					}
+					else {
+						repository = value;
+					}
 					updateRepo();
 				}));
 
@@ -67,23 +80,9 @@ export class PluginTroubleshootingModal extends Modal {
 				.onClick(() => {
 					this.update();
 				}));
-
+		
+		let releases: Partial<Release>[] | undefined = undefined;
 		if (repositoryRegEx.test(this.pluginInfo.repo)) {
-			manifest = await fetchManifest(this.pluginInfo.repo);
-			hasManifest = manifest !== undefined;
-			new Setting(contentEl)
-				.setName('Test connection')
-				.setDesc(hasManifest ? '' : 'Repo could not be found on GitHub. Is everything typed correctly?')
-				.addExtraButton(button => button
-					.setIcon(hasManifest ? ICON_ACCEPT : ICON_DENY)
-					.setTooltip(hasManifest ? '' : 'Try again?')
-					.setDisabled(hasManifest)
-					.onClick(() => {
-						this.update();
-					}));
-		}
-
-		if (hasManifest) {
 			releases = await fetchReleases(this.pluginInfo.repo);
 			hasReleases = releases !== undefined && (releases.length > 0);
 			new Setting(contentEl)
@@ -93,6 +92,24 @@ export class PluginTroubleshootingModal extends Modal {
 					.setIcon(hasReleases ? ICON_ACCEPT : ICON_DENY)
 					.setTooltip(hasReleases ? '' : 'Try again?')
 					.setDisabled(hasReleases)
+					.onClick(() => {
+						this.update();
+					}));
+		}
+
+		if (repositoryRegEx.test(this.pluginInfo.repo) && hasReleases) {
+			const last_release = releases ? releases[0] : undefined;
+			manifest =
+				await fetchManifest(undefined, undefined, last_release) ||
+				await fetchManifest(this.pluginInfo.repo);
+			hasManifest = manifest !== undefined;
+			new Setting(contentEl)
+				.setName('Test manifest')
+				.setDesc(hasManifest ? '' : 'Manifest could not be found on GitHub. Is everything including the repo typed correctly?')
+				.addExtraButton(button => button
+					.setIcon(hasManifest ? ICON_ACCEPT : ICON_DENY)
+					.setTooltip(hasManifest ? '' : 'Try again?')
+					.setDisabled(hasManifest)
 					.onClick(() => {
 						this.update();
 					}));

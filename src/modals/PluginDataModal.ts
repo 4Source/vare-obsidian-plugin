@@ -62,16 +62,19 @@ export class PluginDataModal extends Modal {
 						new Notice('Github <username>/<repository> do not match the pattern!');
 						return;
 					}
-					// Check a manifest could be fetched
-					const manifest = await fetchManifest(repo);
-					if (!manifest) {
-						new Notice('Github repository could not be found!');
-						return;
-					}
 					// check there are releases for the repo
 					const releases = await fetchReleases(repo);
 					if (!releases || releases.length <= 0) {
 						new Notice('No releases found for this plugin. May it do not have any.');
+						return;
+					}
+					// Check a manifest could be fetched
+					const manifest =
+						await fetchManifest(undefined,undefined,releases[0].manifest_url) ||
+						await fetchManifest(repo, releases[0].tag_name) ||
+						await fetchManifest(repo);
+					if (!manifest) {
+						new Notice('Github repository could not be found!');
 						return;
 					}
 					// Combine data

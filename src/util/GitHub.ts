@@ -16,6 +16,7 @@ export interface CommunityPlugin {
 
 export type Release = {
 	url: string;
+	manifest_url: string;
 	html_url: string;
 	assets_url: string;
 	upload_url: string;
@@ -85,6 +86,9 @@ export async function fetchReleases(repository: string): Promise<Partial<Release
 			return {
 				tag_name: value.tag_name,
 				prerelease: value.prerelease,
+				manifest_url: value.assets.find((asset: Asset) => {
+					asset.name === 'manifest.json';
+				})?.browser_download_url,
 			};
 		});
 		return releases;
@@ -99,16 +103,17 @@ export async function fetchReleases(repository: string): Promise<Partial<Release
  * Fetch the manifest for a plugin
  * @param repository The <user>/<repo> of the plugin
  * @param tag_name The name of the tag associated with a release. Required if a specific manifest version is needed.
+ * @param url The url to the manifest file. Optional. If not provided, the default url will be used.
  * @returns The plugin manifest object
  */
-export async function fetchManifest(repository: string, tag_name?: string): Promise<PluginManifest | undefined> {
-	const URL = `https://raw.githubusercontent.com/${repository}/${tag_name ? tag_name : 'HEAD'}/manifest.json`;
+export async function fetchManifest(repository?: string, tag_name?: string, url?:string): Promise<PluginManifest | undefined> {
+	url = url ? url : `https://raw.githubusercontent.com/${repository}/${tag_name ? tag_name : 'HEAD'}/manifest.json`;
 	try {
-		if (!repositoryRegEx.test(repository)) {
+		if (repository && !repositoryRegEx.test(repository)) {
 			throw Error('Repository string do not match the pattern!');
 		}
 		// Do a request to the url
-		const response = await request({ url: URL });
+		const response = await request({ url });
 
 		// Process the response
 		return (await JSON.parse(response)) as PluginManifest;

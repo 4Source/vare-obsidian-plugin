@@ -69,7 +69,7 @@ export class PluginTroubleshootingModal extends Modal {
 				}));
 
 		if (repositoryRegEx.test(this.pluginInfo.repo)) {
-			manifest = await fetchManifest(this.pluginInfo.repo);
+			manifest = await fetchManifest(this.pluginInfo.repo); // leaving this one alone as it seems to serve a different purpose - Blue Falcon
 			hasManifest = manifest !== undefined;
 			new Setting(contentEl)
 				.setName('Test connection')

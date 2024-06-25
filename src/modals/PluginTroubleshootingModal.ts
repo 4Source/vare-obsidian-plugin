@@ -2,7 +2,7 @@ import { Modal, PluginManifest, Setting, debounce } from 'obsidian';
 import { ICON_ACCEPT, ICON_DENY } from 'src/constants';
 import VarePlugin from 'src/main';
 import { PluginInfo } from 'src/settings/SettingsInterface';
-import { fetchManifest, fetchReleases, repositoryRegEx } from 'src/util/GitHub';
+import { Release, fetchManifest, fetchReleases, repositoryRegEx } from 'src/util/GitHub';
 
 export class PluginTroubleshootingModal extends Modal {
 	plugin: VarePlugin;
@@ -81,7 +81,7 @@ export class PluginTroubleshootingModal extends Modal {
 					this.update();
 				}));
 		
-		let releases = undefined;
+		let releases: Partial<Release>[] | undefined = undefined;
 		if (repositoryRegEx.test(this.pluginInfo.repo)) {
 			releases = await fetchReleases(this.pluginInfo.repo);
 			hasReleases = releases !== undefined && (releases.length > 0);

@@ -186,9 +186,9 @@ export class VareSettingTab extends PluginSettingTab {
 							.onClick(async () => {
 								try {
 									// Fetch the manifest from GitHub
-									const manifest_url = plugin.releases.find(release => release.tag_name === plugin.targetVersion)?.manifest_url;
+									const release = plugin.releases.find(release => release.tag_name === plugin.targetVersion);
 									const manifest =
-										await fetchManifest(undefined,undefined,manifest_url) ||
+										await fetchManifest(undefined,undefined,release) ||
 										await fetchManifest(plugin.repo, plugin.targetVersion) ||
 										await fetchManifest(plugin.repo);
 									if (!manifest) {

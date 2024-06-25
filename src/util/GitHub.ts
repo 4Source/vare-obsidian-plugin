@@ -16,7 +16,6 @@ export interface CommunityPlugin {
 
 export type Release = {
 	url: string;
-	manifest_url: string;
 	html_url: string;
 	assets_url: string;
 	upload_url: string;
@@ -86,7 +85,6 @@ export async function fetchReleases(repository: string): Promise<Partial<Release
 			return {
 				tag_name: value.tag_name,
 				prerelease: value.prerelease,
-				manifest_url: value.assets.find((asset: Asset) => asset.name === 'manifest.json')?.browser_download_url,
 			};
 		});
 		return releases;
@@ -101,11 +99,12 @@ export async function fetchReleases(repository: string): Promise<Partial<Release
  * Fetch the manifest for a plugin
  * @param repository The <user>/<repo> of the plugin
  * @param tag_name The name of the tag associated with a release. Required if a specific manifest version is needed.
- * @param url The url to the manifest file. Optional. If not provided, the default url will be used.
+ * @param release The release object of the plugin. Used to replicate Obsidian's behavior of fetching the manifest for the plugin.
  * @returns The plugin manifest object
  */
-export async function fetchManifest(repository?: string, tag_name?: string, url?:string): Promise<PluginManifest | undefined> {
-	url = url ? url : `https://raw.githubusercontent.com/${repository}/${tag_name ? tag_name : 'HEAD'}/manifest.json`;
+export async function fetchManifest(repository?: string, tag_name?: string, release?: Partial<Release>): Promise<PluginManifest | undefined> {
+	const download_url: string | undefined = release?.assets?.find((asset: Asset) => asset.name === 'manifest.json')?.browser_download_url;
+	const url: string = download_url ? download_url : `https://raw.githubusercontent.com/${repository}/${tag_name ? tag_name : 'HEAD'}/manifest.json`;
 	try {
 		if (repository && !repositoryRegEx.test(repository)) {
 			throw Error('Repository string do not match the pattern!');

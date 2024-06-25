@@ -70,11 +70,11 @@ export class PluginDataModal extends Modal {
 					}
 					// Check a manifest could be fetched
 					const manifest =
-						await fetchManifest(undefined,undefined,releases[0].manifest_url) ||
+						await fetchManifest(undefined,undefined,releases[0]) ||
 						await fetchManifest(repo, releases[0].tag_name) ||
 						await fetchManifest(repo);
 					if (!manifest) {
-						new Notice('Github repository could not be found!');
+						new Notice('Plugin manifest could not be found in releases, tag ref, or default branch!');
 						return;
 					}
 					// Combine data

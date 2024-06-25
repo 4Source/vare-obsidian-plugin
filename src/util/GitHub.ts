@@ -85,6 +85,7 @@ export async function fetchReleases(repository: string): Promise<Partial<Release
 			return {
 				tag_name: value.tag_name,
 				prerelease: value.prerelease,
+				assets: value.assets,
 			};
 		});
 		return releases;

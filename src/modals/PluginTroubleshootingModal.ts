@@ -47,7 +47,7 @@ export class PluginTroubleshootingModal extends Modal {
 						repository = repoSections[1];
 					}
 					else {
-					username = value;
+						username = value;
 					}
 					updateRepo();
 				}));
@@ -65,7 +65,7 @@ export class PluginTroubleshootingModal extends Modal {
 						repository = repoSections[1];
 					}
 					else {
-					repository = value;
+						repository = value;
 					}
 					updateRepo();
 				}));
@@ -80,24 +80,27 @@ export class PluginTroubleshootingModal extends Modal {
 				.onClick(() => {
 					this.update();
 				}));
-				
-		const releases = await fetchReleases(this.pluginInfo.repo);
-		hasReleases = releases !== undefined && (releases.length > 0);
-		new Setting(contentEl)
-			.setName('Test releases')
-			.setDesc(hasReleases ? '' : 'Could not find releases on GitHub. May this plugin did not have any.')
-			.addExtraButton(button => button
-				.setIcon(hasReleases ? ICON_ACCEPT : ICON_DENY)
-				.setTooltip(hasReleases ? '' : 'Try again?')
-				.setDisabled(hasReleases)
-				.onClick(() => {
-					this.update();
-				}));
+		
+		let releases = undefined;
+		if (repositoryRegEx.test(this.pluginInfo.repo)) {
+			releases = await fetchReleases(this.pluginInfo.repo);
+			hasReleases = releases !== undefined && (releases.length > 0);
+			new Setting(contentEl)
+				.setName('Test releases')
+				.setDesc(hasReleases ? '' : 'Could not find releases on GitHub. May this plugin did not have any.')
+				.addExtraButton(button => button
+					.setIcon(hasReleases ? ICON_ACCEPT : ICON_DENY)
+					.setTooltip(hasReleases ? '' : 'Try again?')
+					.setDisabled(hasReleases)
+					.onClick(() => {
+						this.update();
+					}));
+		}
 
-		if (repositoryRegEx.test(this.pluginInfo.repo) || hasReleases) {
+		if (repositoryRegEx.test(this.pluginInfo.repo) && hasReleases) {
 			const last_release = releases ? releases[0] : undefined;
 			manifest =
-				await fetchManifest(undefined,undefined,last_release) ||
+				await fetchManifest(undefined, undefined, last_release) ||
 				await fetchManifest(this.pluginInfo.repo);
 			hasManifest = manifest !== undefined;
 			new Setting(contentEl)

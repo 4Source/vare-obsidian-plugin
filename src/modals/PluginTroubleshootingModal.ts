@@ -2,7 +2,7 @@ import { Modal, PluginManifest, Setting, debounce } from 'obsidian';
 import { ICON_ACCEPT, ICON_DENY } from 'src/constants';
 import VarePlugin from 'src/main';
 import { PluginInfo } from 'src/settings/SettingsInterface';
-import { /* Release, */ fetchManifest, fetchReleases, repositoryRegEx } from 'src/util/GitHub';
+import { fetchManifest, fetchReleases, repositoryRegEx } from 'src/util/GitHub';
 
 export class PluginTroubleshootingModal extends Modal {
 	plugin: VarePlugin;
@@ -23,7 +23,6 @@ export class PluginTroubleshootingModal extends Modal {
 		let repository = this.pluginInfo.repo.split('/').at(1) || '';
 		let manifest: PluginManifest | undefined;
 		let hasManifest = false;
-		// let releases: Partial<Release>[] | undefined;
 		let hasReleases = false;
 
 		// Debonce text input

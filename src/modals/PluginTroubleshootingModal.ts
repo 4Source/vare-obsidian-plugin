@@ -41,7 +41,14 @@ export class PluginTroubleshootingModal extends Modal {
 				.setPlaceholder('Username')
 				.setValue(username)
 				.onChange(value => {
+					if (value.contains('/')) {
+						const repoSections = value.split('/');
+						username = repoSections[0];
+						repository = repoSections[1];
+					}
+					else {
 					username = value;
+					}
 					updateRepo();
 				}));
 
@@ -52,7 +59,14 @@ export class PluginTroubleshootingModal extends Modal {
 				.setPlaceholder('Repository')
 				.setValue(repository)
 				.onChange(value => {
+					if (value.contains('/')) {
+						const repoSections = value.split('/');
+						username = repoSections[0];
+						repository = repoSections[1];
+					}
+					else {
 					repository = value;
+					}
 					updateRepo();
 				}));
 

@@ -23,7 +23,7 @@ export class PluginTroubleshootingModal extends Modal {
 		let repository = this.pluginInfo.repo.split('/').at(1) || '';
 		let manifest: PluginManifest | undefined;
 		let hasManifest = false;
-		let releases: Partial<Release>[] | undefined;
+		// let releases: Partial<Release>[] | undefined;
 		let hasReleases = false;
 
 		// Debonce text input
@@ -68,7 +68,7 @@ export class PluginTroubleshootingModal extends Modal {
 					this.update();
 				}));
 				
-		releases = await fetchReleases(this.pluginInfo.repo);
+		const releases = await fetchReleases(this.pluginInfo.repo);
 		hasReleases = releases !== undefined && (releases.length > 0);
 		new Setting(contentEl)
 			.setName('Test releases')

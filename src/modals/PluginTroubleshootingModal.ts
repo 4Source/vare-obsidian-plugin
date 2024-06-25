@@ -2,7 +2,7 @@ import { Modal, PluginManifest, Setting, debounce } from 'obsidian';
 import { ICON_ACCEPT, ICON_DENY } from 'src/constants';
 import VarePlugin from 'src/main';
 import { PluginInfo } from 'src/settings/SettingsInterface';
-import { Release, fetchManifest, fetchReleases, repositoryRegEx } from 'src/util/GitHub';
+import { /* Release, */ fetchManifest, fetchReleases, repositoryRegEx } from 'src/util/GitHub';
 
 export class PluginTroubleshootingModal extends Modal {
 	plugin: VarePlugin;

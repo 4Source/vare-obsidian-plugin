@@ -56,7 +56,7 @@ body:
       required: true
   - type: markdown 
     attributes: 
-      value: "This could be found in Settings>Community plugins>Installed plugins>SettingsProfiles>Version"
+      value: "This could be found in Settings>Community plugins>Installed plugins>VARE>Version"
   - type: textarea
     id: context
     attributes:

@@ -51,32 +51,37 @@ export class PluginDataModal extends Modal {
 						new Notice('Github username cannot be empty!');
 						return;
 					}
+
 					// Check repository exist and is not empty
 					if (!repository || repository === '') {
 						new Notice('Github repository cannot be empty!');
 						return;
 					}
+
 					// Check the repo matches the pattern
 					const repo = `${username}/${repository}`;
 					if (!repositoryRegEx.test(repo)) {
 						new Notice('Github <username>/<repository> do not match the pattern!');
 						return;
 					}
+
 					// check there are releases for the repo
 					const releases = await fetchReleases(repo);
 					if (!releases || releases.length <= 0) {
 						new Notice('No releases found for this plugin. May it do not have any.');
 						return;
 					}
+
 					// Check a manifest could be fetched
 					const manifest =
-						await fetchManifest(undefined,undefined,releases[0]) ||
+						await fetchManifest(undefined, undefined, releases[0]) ||
 						await fetchManifest(repo, releases[0].tag_name) ||
 						await fetchManifest(repo);
 					if (!manifest) {
 						new Notice('Plugin manifest could not be found in releases, tag ref, or default branch!');
 						return;
 					}
+
 					// Combine data
 					const pluginInfo = Object.assign({}, manifest, { repo, releases }) as PluginInfo;
 					pluginInfo.targetVersion = pluginInfo.version;

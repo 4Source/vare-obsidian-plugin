@@ -77,8 +77,10 @@ export async function fetchReleases(repository: string): Promise<Partial<Release
 		if (!repositoryRegEx.test(repository)) {
 			throw Error('Repository string do not match the pattern!');
 		}
+
 		// Do a request to the url
 		const response = await request({ url: URL });
+
 		// Process the response
 		const data = await JSON.parse(response);
 		const releases = data.map((value: Release) => {
@@ -110,6 +112,7 @@ export async function fetchManifest(repository?: string, tag_name?: string, rele
 		if (repository && !repositoryRegEx.test(repository)) {
 			throw Error('Repository string do not match the pattern!');
 		}
+
 		// Do a request to the url
 		const response = await request({ url });
 

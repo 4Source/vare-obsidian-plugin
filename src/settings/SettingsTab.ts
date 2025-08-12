@@ -41,6 +41,7 @@ export class VareSettingTab extends PluginSettingTab {
 					}
 					value.repo = community.repo;
 				}
+
 				// Fetch releases from github
 				const releases = await fetchReleases(value.repo);
 				if (!releases) {
@@ -188,24 +189,30 @@ export class VareSettingTab extends PluginSettingTab {
 									// Fetch the manifest from GitHub
 									const release = plugin.releases.find(release => release.tag_name === plugin.targetVersion);
 									const manifest =
-										await fetchManifest(undefined,undefined,release) ||
+										await fetchManifest(undefined, undefined, release) ||
 										await fetchManifest(plugin.repo, plugin.targetVersion) ||
 										await fetchManifest(plugin.repo);
 									if (!manifest) {
 										throw Error('No manifest found for this plugin!');
 									}
+
 									// Ensure contains dir
 									if (!manifest.dir) {
 										manifest.dir = this.app.vault.configDir + '/plugins/' + plugin.id;
 									}
+
 									// Get the version that should be installed
 									const version = plugin.targetVersion || manifest.version;
 									if (!version) {
 										throw Error('Manifest do not contain a version!');
 									}
-									// Install plugin
-									// @ts-expect-error PluginManifest contains error
+
+									/*
+									 * Install plugin
+									 * @ts-expect-error PluginManifest contains error
+									 */
 									await this.plugin.app.plugins.installPlugin(plugin.repo, version, manifest);
+
 									// Update manifest
 									const installed = this.plugin.app.plugins.manifests[plugin.id];
 									if (!installed) {
@@ -246,7 +253,7 @@ export class VareSettingTab extends PluginSettingTab {
 		upToDate.forEach(plugin => {
 			this.plugin.settings.plugins[plugin[0]] = plugin[1] as PluginData;
 		});
-		
+
 		// Set plugin list
 		this.pluginsList = manifests.map(manifest => {
 			const info: PluginInfo = { ...(manifest[1] as PluginManifest), repo: '', releases: [] };

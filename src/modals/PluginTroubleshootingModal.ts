@@ -80,7 +80,7 @@ export class PluginTroubleshootingModal extends Modal {
 				.onClick(() => {
 					this.update();
 				}));
-		
+
 		let releases: Partial<Release>[] | undefined = undefined;
 		if (repositoryRegEx.test(this.pluginInfo.repo)) {
 			releases = await fetchReleases(this.pluginInfo.repo);

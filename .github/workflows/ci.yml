@@ -76,6 +76,25 @@ jobs:
 
       - name: Run Build
         run: npm run build
+  
+  audit: 
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository 
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.x"
+      
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Audit for vulnerabilities
+        run: npm audit --audit-level=moderate
 
   version:
     name: Version Bump 

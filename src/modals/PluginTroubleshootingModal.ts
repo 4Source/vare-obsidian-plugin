@@ -25,7 +25,7 @@ export class PluginTroubleshootingModal extends Modal {
 		let hasManifest = false;
 		let hasReleases = false;
 
-		// Debonce text input
+		// Debounce text input
 		const updateRepo = debounce(() => {
 			this.pluginInfo.repo = `${username}/${repository}`;
 			this.update();

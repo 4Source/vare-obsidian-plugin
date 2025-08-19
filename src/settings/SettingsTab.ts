@@ -104,6 +104,9 @@ export class VareSettingTab extends PluginSettingTab {
 	}
 
 	private drawPlugins() {
+		// Save current scroll position
+		const scrollTop = this.containerEl.scrollTop ?? 0;
+
 		this.pluginsContainerEl.empty();
 		this.filterPlugins().forEach(plugin => {
 			// Build dropdown options with releases
@@ -257,6 +260,9 @@ export class VareSettingTab extends PluginSettingTab {
 					}));
 			}
 		});
+
+		// Restore Scroll position
+		this.containerEl.scrollTop = scrollTop;
 	}
 
 	private debouncedSearch = debounce((value: string) => {

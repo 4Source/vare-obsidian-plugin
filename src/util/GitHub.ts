@@ -48,10 +48,10 @@ export type File = {
 };
 
 /**
- * Fetch all community plugin entrys.
+ * Fetch all community plugin entries.
  * @returns A list of community plugins
  */
-export async function fetchCommmunityPluginList(): Promise<CommunityPlugin[] | undefined> {
+export async function fetchCommunityPluginList(): Promise<CommunityPlugin[] | undefined> {
 	const URL = 'https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-plugins.json';
 	try {
 		// Do a request to the url

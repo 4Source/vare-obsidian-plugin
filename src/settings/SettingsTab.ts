@@ -1,14 +1,18 @@
-import { App, PluginManifest, PluginSettingTab, Setting } from 'obsidian';
+import { App, debounce, PluginManifest, PluginSettingTab, Setting } from 'obsidian';
 import { ICON_ADD, ICON_FETCH, ICON_FIX, ICON_GITHUB, ICON_INSTALL, ICON_RELOAD, ICON_RESET } from 'src/constants';
 import VarePlugin from 'src/main';
 import { PluginData, PluginInfo } from './SettingsInterface';
 import { PluginDataModal } from 'src/modals/PluginDataModal';
-import { fetchCommmunityPluginList, fetchManifest, fetchReleases } from 'src/util/GitHub';
+import { fetchCommunityPluginList, fetchManifest, fetchReleases } from 'src/util/GitHub';
 import { PluginTroubleshootingModal } from 'src/modals/PluginTroubleshootingModal';
+import { Fzf } from 'fzf';
 
 export class VareSettingTab extends PluginSettingTab {
 	plugin: VarePlugin;
 	pluginsList: PluginInfo[];
+	searchTerm: string;
+	pluginsHeaderEl: HTMLElement;
+	pluginsContainerEl: HTMLElement;
 
 	constructor(app: App, plugin: VarePlugin) {
 		super(app, plugin);
@@ -23,12 +27,12 @@ export class VareSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		// Get the releases for plugins
-		const communityList = await fetchCommmunityPluginList();
+		const communityList = await fetchCommunityPluginList();
 		Promise.all(this.pluginsList.map(async value => {
 			const now = new Date();
 
 			/**
-			 * Fetch releases when one of the codition is true to reduce loading time and network trafic
+			 * Fetch releases when one of the condition is true to reduce loading time and network traffic
 			 * - Has never been fetched
 			 * - The last fetch was more than a day ago
 			 */
@@ -66,9 +70,15 @@ export class VareSettingTab extends PluginSettingTab {
 			})
 			.then(() => {
 				// Heading for Profiles
-				new Setting(containerEl)
+				this.pluginsHeaderEl = new Setting(containerEl)
 					.setHeading()
 					.setName('Plugins')
+					.addText(text => text
+						.setPlaceholder('Search plugins...')
+						.setValue(this.searchTerm)
+						.onChange((value: string) => {
+							this.debouncedSearch(value);
+						}))
 					.addExtraButton(button => button
 						.setIcon(ICON_ADD)
 						.setTooltip('Add unlisted plugin')
@@ -86,161 +96,191 @@ export class VareSettingTab extends PluginSettingTab {
 							// Reload plugins
 							this.loadPluginList();
 							this.display();
-						}));
+						})).settingEl;
 
-				this.pluginsList.forEach(plugin => {
-					// Build dropdown options with releasees
-					let versions = {};
-					if (plugin.releases.length > 0) {
-						plugin.releases.forEach(element => {
-							if (element.tag_name) {
-								const key = element.tag_name;
-								const value = element.tag_name;
-								versions = Object.assign(versions, { [key]: value });
-							}
-						});
-					}
+				this.pluginsContainerEl = containerEl.createEl('div', { cls: 'plugins-container' });
+				this.drawPlugins();
+			});
+	}
 
-					// Missing information
-					let trouble = false;
+	private drawPlugins() {
+		// Save current scroll position
+		const scrollTop = this.containerEl.scrollTop ?? 0;
 
-					// Plugin Info
-					const settings = new Setting(containerEl.createEl('div', { cls: 'plugins-container' }))
-						.setName(plugin.name)
-						.setDesc(createFragment((fragment) => {
-							fragment.append(`Installed version: ${plugin.version}`, fragment.createEl('br'), `Author: ${plugin.author}`);
-						}));
-
-					// GitHub link button and release fetch
-					if (plugin.repo) {
-						settings.addExtraButton(button => button
-							.setIcon(ICON_GITHUB)
-							.setTooltip('Open at GitHub')
-							.onClick(async () => {
-								self.open(`https://github.com/${plugin.repo}`);
-							}))
-							.addExtraButton(button => button
-								.setIcon(ICON_FETCH)
-								.setTooltip('Fetch releases')
-								.onClick(async () => {
-									// Fetch releases from github
-									const releases = await fetchReleases(plugin.repo);
-									if (!releases) {
-										return;
-									}
-									plugin.lastFetch = new Date();
-									plugin.releases = releases;
-									this.display();
-								}));
-					}
-					else {
-						trouble = true;
-					}
-
-					// Reset version
-					settings.addExtraButton(button => button
-						.setIcon(ICON_RESET)
-						.setTooltip('Reset version')
-						.onClick(async () => {
-							delete plugin.targetVersion;
-							this.display();
-						}));
-
-					// Version dropdown
-					if (plugin.releases.length > 0) {
-						settings.addDropdown(dropdown => dropdown
-							.addOptions(versions)
-							.setValue(plugin.targetVersion || '')
-							.onChange(value => {
-								plugin.targetVersion = value;
-								this.display();
-							}));
-					}
-					else {
-						trouble = true;
-					}
-
-					// Trouble shooting plugin
-					if (trouble) {
-						settings.addButton(button => button
-							.setIcon(ICON_FIX)
-							.setTooltip('Troubleshoot plugin.')
-							.setWarning()
-							.onClick(() => {
-								new PluginTroubleshootingModal(this.plugin, plugin, result => {
-									this.pluginsList.every((value, index, array) => {
-										if (value.id === result.id) {
-											array[index] = result;
-											return false;
-										}
-										return true;
-									});
-									this.display();
-								}).open();
-							}));
-					}
-
-					if (plugin.targetVersion && plugin.version !== plugin.targetVersion) {
-						settings.addExtraButton(button => button
-							.setIcon(ICON_INSTALL)
-							.setTooltip('Install version')
-							.onClick(async () => {
-								try {
-									// Fetch the manifest from GitHub
-									const release = plugin.releases.find(release => release.tag_name === plugin.targetVersion);
-									const manifest =
-										await fetchManifest(undefined, undefined, release) ||
-										await fetchManifest(plugin.repo, plugin.targetVersion) ||
-										await fetchManifest(plugin.repo);
-									if (!manifest) {
-										throw Error('No manifest found for this plugin!');
-									}
-
-									// Ensure contains dir
-									if (!manifest.dir) {
-										manifest.dir = this.app.vault.configDir + '/plugins/' + plugin.id;
-									}
-
-									// Get the version that should be installed
-									const version = plugin.targetVersion || manifest.version;
-									if (!version) {
-										throw Error('Manifest do not contain a version!');
-									}
-
-									/*
-									 * Install plugin
-									 * @ts-expect-error PluginManifest contains error
-									 */
-									await this.plugin.app.plugins.installPlugin(plugin.repo, version, manifest);
-
-									// Update manifest
-									const installed = this.plugin.app.plugins.manifests[plugin.id];
-									if (!installed) {
-										throw Error('Installation failed!');
-									}
-									plugin.version = installed.version;
-
-									// Update and save Settings
-									const data: PluginData = {
-										id: plugin.id,
-										repo: plugin.repo,
-										targetVersion: plugin.targetVersion,
-										releases: plugin.releases,
-										lastFetch: plugin.lastFetch,
-									};
-									this.plugin.settings.plugins[plugin.id] = data;
-									await this.plugin.saveSettings();
-
-									this.display();
-								}
-								catch (e) {
-									(e as Error).message = 'Failed to install plugin! ' + (e as Error).message;
-									console.error(e);
-								}
-							}));
+		this.pluginsContainerEl.empty();
+		this.filterPlugins().forEach(plugin => {
+			// Build dropdown options with releases
+			let versions = {};
+			if (plugin.releases.length > 0) {
+				plugin.releases.forEach(element => {
+					if (element.tag_name) {
+						const key = element.tag_name;
+						const value = element.tag_name;
+						versions = Object.assign(versions, { [key]: value });
 					}
 				});
-			});
+			}
+
+			// Missing information
+			let trouble = false;
+
+			// Plugin Info
+			const settings = new Setting(this.pluginsContainerEl.createEl('div', { cls: 'plugin-container' }))
+				.setName(plugin.name)
+				.setDesc(createFragment((fragment) => {
+					fragment.append(`Installed version: ${plugin.version}`, fragment.createEl('br'), `Author: ${plugin.author}`);
+				}));
+
+			// GitHub link button and release fetch
+			if (plugin.repo) {
+				settings.addExtraButton(button => button
+					.setIcon(ICON_GITHUB)
+					.setTooltip('Open at GitHub')
+					.onClick(async () => {
+						self.open(`https://github.com/${plugin.repo}`);
+					}))
+					.addExtraButton(button => button
+						.setIcon(ICON_FETCH)
+						.setTooltip('Fetch releases')
+						.onClick(async () => {
+							// Fetch releases from github
+							const releases = await fetchReleases(plugin.repo);
+							if (!releases) {
+								return;
+							}
+							plugin.lastFetch = new Date();
+							plugin.releases = releases;
+							this.drawPlugins();
+						}));
+			}
+			else {
+				trouble = true;
+			}
+
+			// Reset version
+			settings.addExtraButton(button => button
+				.setIcon(ICON_RESET)
+				.setTooltip('Reset version')
+				.onClick(async () => {
+					delete plugin.targetVersion;
+					this.drawPlugins();
+				}));
+
+			// Version dropdown
+			if (plugin.releases.length > 0) {
+				settings.addDropdown(dropdown => dropdown
+					.addOptions(versions)
+					.setValue(plugin.targetVersion || '')
+					.onChange(value => {
+						plugin.targetVersion = value;
+						this.drawPlugins();
+					}));
+			}
+			else {
+				trouble = true;
+			}
+
+			// Trouble shooting plugin
+			if (trouble) {
+				settings.addButton(button => button
+					.setIcon(ICON_FIX)
+					.setTooltip('Troubleshoot plugin.')
+					.setWarning()
+					.onClick(() => {
+						new PluginTroubleshootingModal(this.plugin, plugin, result => {
+							this.pluginsList.every((value, index, array) => {
+								if (value.id === result.id) {
+									array[index] = result;
+									return false;
+								}
+								return true;
+							});
+							this.drawPlugins();
+						}).open();
+					}));
+			}
+
+			if (plugin.targetVersion && plugin.version !== plugin.targetVersion) {
+				settings.addExtraButton(button => button
+					.setIcon(ICON_INSTALL)
+					.setTooltip('Install version')
+					.onClick(async () => {
+						try {
+							// Fetch the manifest from GitHub
+							const release = plugin.releases.find(release => release.tag_name === plugin.targetVersion);
+							const manifest =
+								await fetchManifest(undefined, undefined, release) ||
+								await fetchManifest(plugin.repo, plugin.targetVersion) ||
+								await fetchManifest(plugin.repo);
+							if (!manifest) {
+								throw Error('No manifest found for this plugin!');
+							}
+
+							// Ensure contains dir
+							if (!manifest.dir) {
+								manifest.dir = this.app.vault.configDir + '/plugins/' + plugin.id;
+							}
+
+							// Get the version that should be installed
+							const version = plugin.targetVersion || manifest.version;
+							if (!version) {
+								throw Error('Manifest do not contain a version!');
+							}
+
+							/*
+							 * Install plugin
+							 * @ts-expect-error PluginManifest contains error
+							 */
+							await this.plugin.app.plugins.installPlugin(plugin.repo, version, manifest);
+
+							// Update manifest
+							const installed = this.plugin.app.plugins.manifests[plugin.id];
+							if (!installed) {
+								throw Error('Installation failed!');
+							}
+							plugin.version = installed.version;
+
+							// Update and save Settings
+							const data: PluginData = {
+								id: plugin.id,
+								repo: plugin.repo,
+								targetVersion: plugin.targetVersion,
+								releases: plugin.releases,
+								lastFetch: plugin.lastFetch,
+							};
+							this.plugin.settings.plugins[plugin.id] = data;
+							await this.plugin.saveSettings();
+
+							this.drawPlugins();
+						}
+						catch (e) {
+							(e as Error).message = 'Failed to install plugin! ' + (e as Error).message;
+							console.error(e);
+						}
+					}));
+			}
+		});
+
+		// Restore Scroll position
+		this.containerEl.scrollTop = scrollTop;
+	}
+
+	private debouncedSearch = debounce((value: string) => {
+		this.searchTerm = value;
+		this.drawPlugins();
+	}, 250, true);
+
+	private filterPlugins(): PluginInfo[] {
+		// No search term full list should be returned
+		if (!this.searchTerm || this.searchTerm === '') {
+			return this.pluginsList;
+		}
+
+		const fzf = new Fzf(this.pluginsList, {
+			selector: (plugin: PluginInfo) => `${plugin.name} ${plugin.author} ${plugin.version}`,
+		});
+
+		return fzf.find(this.searchTerm).map(res => res.item);
 	}
 
 	loadPluginList() {

@@ -1,6 +1,8 @@
 # VARE - Version and Resource Explorer
 Now you can easily manage your plugins and themes inside Obsidian. Simply select the version you want to install or install unlisted ones from GitHub. Or if you want to test the new beta of your favorite plugin, simply select the version you want, install it and switch back if necessary.
 
+![2025-09-25 10-55-41](https://github.com/user-attachments/assets/7de84516-a315-4f32-a6b1-2ddf7d92c1e7)
+
 # Contribution
 Feel free to contribute.
 

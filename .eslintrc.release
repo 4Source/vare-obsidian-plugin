@@ -9,7 +9,6 @@
 				"allow": [
 					"warn",
 					"error",
-					"debug"
 				]
 			}
 		],
